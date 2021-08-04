@@ -48,13 +48,13 @@ app.use(function(req,res,next){
 });
 
 app.use(indexRoutes);
-app.use(commentRoutes);
-app.use(postRoutes);
+app.use("/posts/:id/comments", commentRoutes);
+app.use("/posts", postRoutes);
 
 
 const JWT_SECRET = 'secret..';
 
-seedDB();
+// seedDB(); // seed database
 
 //=======
 // ROUTES
@@ -69,6 +69,7 @@ seedDB();
 
 app.post("/posts/:id/likes", (req,res)=>{
     let query = { _id: req.params.id};
+
     Post.findOneAndUpdate(
         query, 
         {$inc:{ likes: 1}},
@@ -78,6 +79,7 @@ app.post("/posts/:id/likes", (req,res)=>{
         }
     )  
 });
+
 
 
 app.listen(3000, ()=>{

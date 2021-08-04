@@ -26,35 +26,35 @@ const data = [
 function seedDB(){
     //Remove all posts
     Post.deleteMany({}, (err)=>{
-        if(err){
-            console.log(err);
-        } else{
-            console.log("removed posts!");
-            //add a few posts
-            data.forEach((seed)=>{
-                Post.create(seed, (err,post)=>{
-                    if(err){
-                        console.log(err);
-                    } else {
-                        console.log("added a post");
-                        //add a few comments
-                        Comment.create(
-                        {
-                            text: "This place is great, but I wish there was internet",
-                            author: "Gulshan"
-                        }, (err, comment)=>{
-                            if(err){
-                                console.log(err);
-                            } else{
-                                    post.comments.push(comment);
-                                    post.save();
-                                    console.log("Created new comment");
-                            }
-                        });
-                    }
-                });
-            });
-        }
+        // if(err){
+        //     console.log(err);
+        // } else{
+        //     console.log("removed posts!");
+        //     //add a few posts
+        //     data.forEach((seed)=>{
+        //         Post.create(seed, (err,post)=>{
+        //             if(err){
+        //                 console.log(err);
+        //             } else {
+        //                 console.log("added a post");
+        //                 //add a few comments
+        //                 Comment.create(
+        //                 {
+        //                     text: "This place is great, but I wish there was internet",
+        //                     author: "Gulshan"
+        //                 }, (err, comment)=>{
+        //                     if(err){
+        //                         console.log(err);
+        //                     } else{
+        //                             post.comments.push(comment);
+        //                             post.save();
+        //                             console.log("Created new comment");
+        //                     }
+        //                 });
+        //             }
+        //         });
+        //     });
+        // }
     });
     
     

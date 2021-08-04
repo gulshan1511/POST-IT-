@@ -1,20 +1,27 @@
 <%- include("../partials/header") %>
 
 <div class="container">
-    <div class="col-md-12">
+    <div class="show">
         <div class="thumbnail">
             <img class="img-responsive" src="<%= post.image %>">
             <div class="caption-full">
                 <h1><a href="#"><%= post.name %></a></h1>
                 <p><p><%= post.description %></p></p>
-                <strong><%= post.likes %> likes so far!!</strong>
+                <p>
+                    <em>Submitted By <%= post.author.username %></em>
+                </p>
+
                 <form action="/posts/<%= post._id %>/likes" method="post">
                     <button class="btn btn-primary">Like</button>
                 </form>
-                <a class="btn btn-primary" href="/posts/<%= post._id %>/edit">Edit</a>
+
+                <strong><%= post.likes %> likes so far!!</strong><br>
+                <% if(currentUser && post.author.id.equals(currentUser._id)) {%>
+                <a id="edit-button" class="btn btn-warning" href="/posts/<%= post._id %>/edit">Edit</a>
                 <form class="pull-right" id="delete" action="/posts/<%= post._id %>?_method=delete" method="post">
                     <button class="btn btn-danger">Delete</button>
                 </form>
+                <% } %>
             </div>
         </div>
         <div class="well">
@@ -25,7 +32,7 @@
             <% post.comments.forEach((comment)=>{ %>
                 <div class="row">
                     <div class="col-md-12">
-                        <strong><%= comment.author %></strong>
+                        <strong><%= comment.author.username %></strong>
                         <p>
                             <%= comment.text %>
                         </p>

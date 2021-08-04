@@ -8,3 +8,8 @@
 .thumbnail .caption-full {
     padding: 10px;
 }
+
+.show {
+    width: 70%;
+    margin: auto;
+}

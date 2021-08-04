@@ -2,11 +2,11 @@
 // COMMENTS ROUTES
 //==============
 var express = require("express");
-var router  = express.Router();
+var router  = express.Router({mergeParams: true});
 var Post    = require("../models/post");
 var Comment = require("../models/comment");
 
-router.get("/posts/:id/comments/new", isLoggedIn, (req,res)=>{
+router.get("/new", isLoggedIn, (req,res)=>{
     Post.findById(req.params.id, (err, post)=>{
         if(err){
             console.log(err);
@@ -18,7 +18,7 @@ router.get("/posts/:id/comments/new", isLoggedIn, (req,res)=>{
     
 });
 
-router.post("/posts/:id/comments", (req,res)=>{
+router.post("/", isLoggedIn, (req,res)=>{
     Post.findById(req.params.id, (err,post)=>{
         if(err){
             console.log(err);
@@ -30,8 +30,14 @@ router.post("/posts/:id/comments", (req,res)=>{
                     console.log(err);
                 }
                 else{
+                    // add username and id to comment
+                    comment.author.id = req.user._id;
+                    comment.author.username = req.user.username; 
+                    //save comment
+                    comment.save();
                     post.comments.push(comment);
                     post.save();
+                    
                     res.redirect('/posts/' + post._id);
                 }
             });

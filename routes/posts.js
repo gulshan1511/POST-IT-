@@ -2,7 +2,7 @@ var express = require("express");
 var router  = express.Router();
 var Post    = require("../models/post");
 
-router.get("/posts", (req,res)=>{
+router.get("/", isLoggedIn, (req,res)=>{
     console.log(req.user);
     Post.find({}, (err,posts)=>{
         if(err){
@@ -14,16 +14,24 @@ router.get("/posts", (req,res)=>{
     });
 });
 
-router.get("/posts/new", isLoggedIn, (req,res)=>{
+router.get("/new", isLoggedIn, (req,res)=>{
     res.render("posts/new");
 });
 
 // CREATE ROUTE
-router.post("/posts", isLoggedIn, (req,res)=>{
-    Post.create(req.body.post, (err, post)=>{
+router.post("/", isLoggedIn, (req,res)=>{
+    const author = {
+        id: req.user._id,
+        username: req.user.username
+    }
+
+    const newPost = {name: req.body.name, image: req.body.image, description: req.body.description, author: author}
+
+    Post.create(newPost, (err, post)=>{
         if(err){
             console.log(err);
         } else{
+            console.log(post);
             res.redirect("/posts");
             console.log(post);
         }
@@ -31,7 +39,7 @@ router.post("/posts", isLoggedIn, (req,res)=>{
 });
 
 //SHOW - show more information about one post
-router.get("/posts/:id", isLoggedIn, (req,res)=>{
+router.get("/:id", (req,res)=>{
     Post.findById(req.params.id).populate("comments").exec((err,post)=>{
         if(err){
             console.log(err);
@@ -43,20 +51,16 @@ router.get("/posts/:id", isLoggedIn, (req,res)=>{
 });
 
 // EDIT ROUTE
-router.get("/posts/:id/edit", isLoggedIn, (req,res)=>{
-    Post.findById(req.params.id, (err, post)=>{
-        if(err){
-            res.redirect("/posts");
-        } else{
+router.get("/:id/edit", checkPostOwnership, (req,res)=>{
+        Post.findById(req.params.id, (err, post)=>{
             res.render("posts/edit", {post: post});
-        }
-    });
-     
-});
+        });
+    }); 
+
 
 // UPDATE ROUTE
 
-router.put("/posts/:id", isLoggedIn, (req,res)=>{
+router.put("/:id", checkPostOwnership, (req,res)=>{
     Post.findByIdAndUpdate(req.params.id, req.body.post, (err, post)=>{
         if(err){
             res.redirect("/posts");
@@ -68,7 +72,7 @@ router.put("/posts/:id", isLoggedIn, (req,res)=>{
 
 // DESTROY ROUTE
 
-router.delete("/posts/:id", isLoggedIn, (req, res)=>{
+router.delete("/:id", checkPostOwnership, (req, res)=>{
     Post.findByIdAndRemove(req.params.id, (err,post)=>{
         if(err){
             res.redirect("/posts");
@@ -78,12 +82,32 @@ router.delete("/posts/:id", isLoggedIn, (req, res)=>{
     });
 });
 
-//Middleware
+//Middlewares
 function isLoggedIn(req,res,next){
     if(req.isAuthenticated()){
         return next();
     }
     res.redirect("/login");
+}
+
+function checkPostOwnership(req,res,next){
+    if(req.isAuthenticated()){
+        Post.findById(req.params.id, (err, post)=>{
+            if(err){
+                res.redirect("back");
+            } else{
+                //does user own post
+                if(post.author.id.equals(req.user._id)){
+                    next();
+                } else {
+                    res.redirect("back");
+                }
+                
+            }
+        });
+    } else{
+        res.redirect("back");
+    }
 }
 
 module.exports = router;
