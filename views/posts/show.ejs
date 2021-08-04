@@ -7,6 +7,10 @@
             <div class="caption-full">
                 <h1><a href="#"><%= post.name %></a></h1>
                 <p><p><%= post.description %></p></p>
+                <strong><%= post.likes %> likes so far!!</strong>
+                <form action="/posts/<%= post._id %>/likes" method="post">
+                    <button class="btn btn-primary">Like</button>
+                </form>
                 <a class="btn btn-primary" href="/posts/<%= post._id %>/edit">Edit</a>
                 <form class="pull-right" id="delete" action="/posts/<%= post._id %>?_method=delete" method="post">
                     <button class="btn btn-danger">Delete</button>
