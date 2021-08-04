@@ -4,8 +4,12 @@ passport              = require("passport"),
 LocalStrategy         = require("passport-local"),
 passportLocalMongoose = require("passport-local-mongoose"),
 User                  = require("./models/user"),
+Post                  = require("./models/post"),
+Comment               = require("./models/comment"),
 jwt                   = require("jsonwebtoken"),
 bcrypt                = require("bcrypt"), 
+methodOverride        = require("method-override"),
+seedDB                = require("./seeds"),
 mongoose              = require("mongoose");
 
 
@@ -24,6 +28,7 @@ app.use(express.urlencoded({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(methodOverride("_method"));
 
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
@@ -31,16 +36,126 @@ passport.deserializeUser(User.deserializeUser());
 
 const JWT_SECRET = 'secret..';
 
+seedDB();
+
 //=======
 // ROUTES
 //=======
 
 app.get("/", (req,res)=>{
-    res.render("home");
+    res.render("posts/home");
 });
 
-app.get("/secret", isLoggedIn, (req,res)=>{
-    res.render("secret");
+app.get("/posts", isLoggedIn, (req,res)=>{
+    Post.find({}, (err,posts)=>{
+        if(err){
+            console.log(err);
+        }else{
+            console.log(posts);
+            res.render("posts/index", {posts: posts});
+        }
+    });
+});
+
+app.get("/posts/new", isLoggedIn, (req,res)=>{
+    res.render("posts/new");
+});
+
+// CREATE ROUTE
+app.post("/posts", isLoggedIn, (req,res)=>{
+    Post.create(req.body.post, (err, post)=>{
+        if(err){
+            console.log(err);
+        } else{
+            res.redirect("/posts");
+            console.log(post);
+        }
+    });
+});
+
+//SHOW - show more information about one post
+app.get("/posts/:id", isLoggedIn, (req,res)=>{
+    Post.findById(req.params.id).populate("comments").exec((err,post)=>{
+        if(err){
+            console.log(err);
+        }else{
+            console.log(post);
+            res.render("posts/show",{post: post});
+        }
+    });
+});
+
+// EDIT ROUTE
+app.get("/posts/:id/edit", isLoggedIn, (req,res)=>{
+    Post.findById(req.params.id, (err, post)=>{
+        if(err){
+            res.redirect("/posts");
+        } else{
+            res.render("posts/edit", {post: post});
+        }
+    });
+     
+});
+
+// UPDATE ROUTE
+
+app.put("/posts/:id", isLoggedIn, (req,res)=>{
+    Post.findByIdAndUpdate(req.params.id, req.body.post, (err, post)=>{
+        if(err){
+            res.redirect("/posts");
+        } else{
+            res.redirect("/posts/"+req.params.id);
+        }
+    });
+});
+
+// DESTROY ROUTE
+
+app.delete("/posts/:id", isLoggedIn, (req, res)=>{
+    Post.findByIdAndRemove(req.params.id, (err,post)=>{
+        if(err){
+            res.redirect("/posts");
+        } else{
+            res.redirect("/posts");
+        }
+    });
+});
+
+//==============
+// COMMENTS ROUTES
+//==============
+
+app.get("/posts/:id/comments/new", (req,res)=>{
+    Post.findById(req.params.id, (err, post)=>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.render("comments/new", {post: post});
+        }
+    });
+    
+});
+
+app.post("/posts/:id/comments", (req,res)=>{
+    Post.findById(req.params.id, (err,post)=>{
+        if(err){
+            console.log(err);
+            res.redirect("/posts");
+        }
+        else{
+            Comment.create(req.body.comment, (err,comment)=>{
+                if(err){
+                    console.log(err);
+                }
+                else{
+                    post.comments.push(comment);
+                    post.save();
+                    res.redirect('/posts/' + post._id);
+                }
+            });
+        }
+    });
 });
 
 //Auth Routes
@@ -56,7 +171,7 @@ app.post("/register", (req,res)=>{
             return res.render("register");
         }
         passport.authenticate("local")(req,res,()=>{
-            res.redirect("/secret");
+            res.redirect("/posts");
         });
     });
 });
@@ -67,12 +182,12 @@ app.get("/login",(req,res)=>{
 });
 
 app.post("/login",passport.authenticate("local",{
-    successRedirect: "/secret",
+    successRedirect: "/posts",
     failureRedirect: "/login"
 }),(req,res)=>{
     if(err){
         console.log(err);
-        return res.render("/");
+        return res.redirect("/");
     }
 });
 

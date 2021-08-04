@@ -1,0 +1,35 @@
+<%- include("../partials/header") %>
+
+<div class="container">
+    <div class="col-md-12">
+        <div class="thumbnail">
+            <img class="img-responsive" src="<%= post.image %>">
+            <div class="caption-full">
+                <h1><a href="#"><%= post.name %></a></h1>
+                <p><p><%= post.description %></p></p>
+                <a class="btn btn-primary" href="/posts/<%= post._id %>/edit">Edit</a>
+                <form class="pull-right" id="delete" action="/posts/<%= post._id %>?_method=delete" method="post">
+                    <button class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+        <div class="well">
+            <div class="text-right">
+                <a class="btn btn-success" href="/posts/<%= post._id %>/comments/new">Add New Comment</a>
+            </div>
+            <hr>
+            <% post.comments.forEach((comment)=>{ %>
+                <div class="row">
+                    <div class="col-md-12">
+                        <strong><%= comment.author %></strong>
+                        <p>
+                            <%= comment.text %>
+                        </p>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+</div>
+
+<%- include("../partials/footer") %>
