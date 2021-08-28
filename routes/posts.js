@@ -1,8 +1,9 @@
 var express = require("express");
 var router  = express.Router();
 var Post    = require("../models/post");
+var middleware = require("../middleware");
 
-router.get("/", isLoggedIn, (req,res)=>{
+router.get("/", middleware.isLoggedIn, (req,res)=>{
     console.log(req.user);
     Post.find({}, (err,posts)=>{
         if(err){
@@ -14,12 +15,12 @@ router.get("/", isLoggedIn, (req,res)=>{
     });
 });
 
-router.get("/new", isLoggedIn, (req,res)=>{
+router.get("/new", middleware.isLoggedIn, (req,res)=>{
     res.render("posts/new");
 });
 
 // CREATE ROUTE
-router.post("/", isLoggedIn, (req,res)=>{
+router.post("/", middleware.isLoggedIn, (req,res)=>{
     const author = {
         id: req.user._id,
         username: req.user.username
@@ -51,7 +52,7 @@ router.get("/:id", (req,res)=>{
 });
 
 // EDIT ROUTE
-router.get("/:id/edit", checkPostOwnership, (req,res)=>{
+router.get("/:id/edit", middleware.checkPostOwnership, (req,res)=>{
         Post.findById(req.params.id, (err, post)=>{
             res.render("posts/edit", {post: post});
         });
@@ -60,7 +61,7 @@ router.get("/:id/edit", checkPostOwnership, (req,res)=>{
 
 // UPDATE ROUTE
 
-router.put("/:id", checkPostOwnership, (req,res)=>{
+router.put("/:id", middleware.checkPostOwnership, (req,res)=>{
     Post.findByIdAndUpdate(req.params.id, req.body.post, (err, post)=>{
         if(err){
             res.redirect("/posts");
@@ -72,7 +73,7 @@ router.put("/:id", checkPostOwnership, (req,res)=>{
 
 // DESTROY ROUTE
 
-router.delete("/:id", checkPostOwnership, (req, res)=>{
+router.delete("/:id", middleware.checkPostOwnership, (req, res)=>{
     Post.findByIdAndRemove(req.params.id, (err,post)=>{
         if(err){
             res.redirect("/posts");
@@ -82,32 +83,6 @@ router.delete("/:id", checkPostOwnership, (req, res)=>{
     });
 });
 
-//Middlewares
-function isLoggedIn(req,res,next){
-    if(req.isAuthenticated()){
-        return next();
-    }
-    res.redirect("/login");
-}
 
-function checkPostOwnership(req,res,next){
-    if(req.isAuthenticated()){
-        Post.findById(req.params.id, (err, post)=>{
-            if(err){
-                res.redirect("back");
-            } else{
-                //does user own post
-                if(post.author.id.equals(req.user._id)){
-                    next();
-                } else {
-                    res.redirect("back");
-                }
-                
-            }
-        });
-    } else{
-        res.redirect("back");
-    }
-}
 
 module.exports = router;

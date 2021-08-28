@@ -10,7 +10,8 @@ jwt                   = require("jsonwebtoken"),
 bcrypt                = require("bcrypt"), 
 methodOverride        = require("method-override"),
 seedDB                = require("./seeds"),
-mongoose              = require("mongoose");
+mongoose              = require("mongoose"),
+flash                 = require("connect-flash");
 
 const postRoutes      = require("./routes/posts");
 const commentRoutes   = require("./routes/comments");
@@ -35,6 +36,7 @@ app.use(require("express-session")({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride("_method"));
+app.use(flash());
 
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
@@ -44,6 +46,8 @@ passport.deserializeUser(User.deserializeUser());
 //==========
 app.use(function(req,res,next){
     res.locals.currentUser = req.user;
+    res.locals.error = req.flash("error");
+    res.locals.success = req.flash("success");
     next();
 });
 
@@ -55,30 +59,6 @@ app.use("/posts", postRoutes);
 const JWT_SECRET = 'secret..';
 
 // seedDB(); // seed database
-
-//=======
-// ROUTES
-//=======
-
-
-
-
-//=========
-// LIKE ROUTE
-//=========
-
-app.post("/posts/:id/likes", (req,res)=>{
-    let query = { _id: req.params.id};
-
-    Post.findOneAndUpdate(
-        query, 
-        {$inc:{ likes: 1}},
-        (err, post) => {   
-            console.log(post);
-            res.redirect('/posts/' + post._id);
-        }
-    )  
-});
 
 
 
