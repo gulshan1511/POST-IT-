@@ -16,6 +16,7 @@ flash                 = require("connect-flash");
 const postRoutes      = require("./routes/posts");
 const commentRoutes   = require("./routes/comments");
 const indexRoutes     = require("./routes/index");
+const port            = process.env.PORT || 8000;
 
 
 // mongoose.connect('mongodb://localhost/auth_task', {useNewUrlParser: true, useUnifiedTopology: true});
@@ -64,6 +65,13 @@ const JWT_SECRET = 'secret..';
 
 
 
-app.listen(3000, ()=>{
+app.listen(port, ()=>{
     console.log("SERVER STARTED");
 });
+
+// app.listen(process.env.PORT, '0.0.0.0');
+
+// app.on('unhandledRejection', (reason, p) => {
+//     console.error('Unhandled Rejection at:', p, 'reason:', reason)
+//     process.exit(1)
+//   });
