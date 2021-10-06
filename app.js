@@ -18,7 +18,9 @@ const commentRoutes   = require("./routes/comments");
 const indexRoutes     = require("./routes/index");
 
 
-mongoose.connect('mongodb://localhost/auth_task', {useNewUrlParser: true, useUnifiedTopology: true});
+// mongoose.connect('mongodb://localhost/auth_task', {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect('mongodb+srv://gulshan:password@123@post-it.k38ug.mongodb.net/Post-it?retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology: true});
+//mongodb+srv://gulshan:<password@123>@post-it.k38ug.mongodb.net/Post-it?retryWrites=true&w=majority
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(express.json());
