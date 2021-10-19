@@ -4,7 +4,6 @@
 
 
 <div class="container">
-    <h3>Our Most Popular Posts</h3>
     <div class="row text-center" style="display:flex; flex-wrap: wrap;">
         <% posts.forEach( post => { %>
             <div class="col-md-3 col-sm-6">
@@ -12,7 +11,7 @@
                     <img src="<%= post["image"] %>">
                 </div>
                 <div class="caption">
-                    <h4><%= post["name"] %></h4>
+                    <h4 id="postsName"><%= post["name"] %></h4>
                 </div>
                 <p>
                     <a href="/posts/<%= post._id %>" class="btn btn-primary">More Info</a>
